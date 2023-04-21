@@ -481,7 +481,6 @@ recv_2:
 	char bad[] = {"AES Key failed.\n"};
 	
 	ret_1 = 0, ret_2 = 0;
-	flag_1 = -1, flag_2 = -1;
 	
 	if(flag_1 == 0){
 		printf("Server: Send AES Key to Client 1\n");
