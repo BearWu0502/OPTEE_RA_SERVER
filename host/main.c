@@ -423,8 +423,8 @@ recv_1:
 		}
 		else{
 			printf("From Client 1: %s\n", receive_1);
-			if(strcmp(receive_1, success)) flag_1 = 0;
-			else if(strcmp(receive_1, fail)) flag_1 = 1;
+			if(strcmp(receive_1, success) == 0) flag_1 = 0;
+			else if(strcmp(receive_1, fail) == 0) flag_1 = 1;
 			else flag_1 = 2;
 			if(flag_2 != -1) break;
 		}
