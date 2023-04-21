@@ -351,6 +351,16 @@ int main(int argc, char *argv[])
 	if(err == -1){
 		printf("Client 1 Connection Error.\n");
 	}
+	else{
+		printf("Sending Signature to Client 1...\n");
+		send(sockfd_1, sign, sizeof(sign), 0);
+		printf("Sending Signature Size to Client 1...\n");
+		send(sockfd_1, sign_size, sizeof(sign_size), 0);
+		printf("Sending Hash to Client 1...\n");
+		send(sockfd_1, hash, sizeof(hash), 0);
+		printf("Sending Hash Size to Client 1...\n");
+		send(sockfd_1, hash_size, sizeof(hash_size), 0);
+	}
 	
 	struct sockaddr_in client_info_2;
 	bzero(&client_info_2, sizeof(client_info_2));
@@ -364,6 +374,16 @@ int main(int argc, char *argv[])
 	if(err == -1){
 		printf("Client 2 Connection Error.\n");
 	}
+	else{
+		printf("Sending Signature to Client 2...\n");
+		send(sockfd_2, sign, sizeof(sign), 0);
+		printf("Sending Signature Size to Client 2...\n");
+		send(sockfd_2, sign_size, sizeof(sign_size), 0);
+		printf("Sending Hash to Client 2...\n");
+		send(sockfd_2, hash, sizeof(hash), 0);
+		printf("Sending Hash Size to Client 2...\n");
+		send(sockfd_2, hash_size, sizeof(hash_size), 0);
+	}
 	
 	int ret_1, ret_2, wait_1, wait_2, flag_1 = -1, flag_2 = -1;
 	char receive_1[1024] = {}, receive_2[1024] = {};
@@ -372,6 +392,7 @@ int main(int argc, char *argv[])
 	time_t start, end_1, end_2;
 	start = time(NULL);
 	
+	/*
 	printf("Sending Signature to Client 1 and 2...\n");
 	send(sockfd_1, sign, sizeof(sign), 0);
 	send(sockfd_2, sign, sizeof(sign), 0);
@@ -384,6 +405,8 @@ int main(int argc, char *argv[])
 	printf("Sending Hash Size to Client 1 and 2...\n");
 	send(sockfd_1, hash_size, sizeof(hash_size), 0);
 	send(sockfd_2, hash_size, sizeof(hash_size), 0);
+	*/
+	
 	printf("Receiving message from Client 1 and 2...\n");
 	while(1){
 recv_1:
