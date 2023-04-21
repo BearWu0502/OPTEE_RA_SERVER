@@ -536,82 +536,113 @@ send_2:
 		memset(receive_2, 0, sizeof(receive_2));
 	}
 	
-	close(sockfd_1);
-	close(sockfd_2);
-	
 	/* Receive Client Status */
 	
 	printf("Server: Receive Client Status\n");
 	
-	int result, cnt = 0, check = 2;
-	if(flag_1 != 0) check--;
-	if(flag_2 != 0) check--;
+	int result, check_1 = -1, check_2 = -1;
+	if(flag_1 == 0) check_1 = 0;
+	if(flag_2 == 0) check_2 = 0;
+	flag_1 = -1, flag_2 = -1;
 	char receiveMessage[] = {"Data received.\n"};
 	char failMessage[] = {"Incorrect Data.\n"};
-	/*
-	printf("Creating socket...\n");
-	int sockfd = 0, forClientSockfd = 0;
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-
-	if (sockfd == -1){
-		printf("Fail to create a socket.\n");
-	} else printf("Socket created.\n");
-
-	struct sockaddr_in serverInfo, clientInfo;
-	socklen_t addrlen = sizeof(clientInfo);
-	bzero(&serverInfo, sizeof(serverInfo));
-	serverInfo.sin_family = PF_INET;
-	serverInfo.sin_addr.s_addr = INADDR_ANY;
-	serverInfo.sin_port = htons(8700);
-	bind(sockfd, (struct sockaddr*)&serverInfo, sizeof(serverInfo));
-	listen(sockfd, 5);
-	*/
-	while(cnt < check){
-		printf("Client Linking...\n");
-		//forClientSockfd = accept(sockfd, (struct sockaddr*)&clientInfo, &addrlen);
-		if(flag_1 == 0){
-			recv(sockfd_1, ciph, sizeof(ciph), 0);
-			printf("From Client 1: %s\n", ciph);
-			
-			/* check message 1 correction */
-		
-			printf("Set key in TA\n");
-			set_key(&ctx);
-		
-			printf("Reset ciphering operation in TA (provides the initial vector)\n");
-			set_iv(&ctx, iv, AES_BLOCK_SIZE);
-			
-			printf("Decode buffer from TA\n");
-			cipher_buffer(&ctx, ciph, AES_TEST_BUFFER_SIZE, &result);
-			if(result == 0){
-				send(sockfd_1, failMessage, sizeof(failMessage), 0);
+	
+	time_t start_1, start_2;
+	start_1 = time(NULL);
+	start_2 = time(NULL);
+	printf("Client Linking...\n");
+	while(1){
+		if(check_1 == 0){
+status_1:
+			ret_1 = recv(sockfd_1, ciph, sizeof(ciph), MSG_DONTWAIT);
+			if(ret_1 < 0){
+				end_1 = time(NULL);
+				wait_1 = difftime(end_1, start_1);
+				if(wait_1 > 10){
+					printf("Client 1 lost.\n");
+					flag_1 = 2;
+					if(check_2 == -1) break;
+					else if(flag_2 == 2 || flag_2 == 0) break;
+					else goto status_2;
+				}
 			}
 			else{
-				send(sockfd_1, receiveMessage, sizeof(receiveMessage), 0);
+				printf("From Client 1: %s\n", ciph);
+
+				/* check message 1 correction */
+
+				printf("Set key in TA\n");
+				set_key(&ctx);
+
+				printf("Reset ciphering operation in TA (provides the initial vector)\n");
+				set_iv(&ctx, iv, AES_BLOCK_SIZE);
+
+				printf("Decode buffer from TA\n");
+				cipher_buffer(&ctx, ciph, AES_TEST_BUFFER_SIZE, &result);
+				if(result == 0){
+					printf("Incorrect Data. Request Client 1 to send again...\n");
+					send(sockfd_1, failMessage, sizeof(failMessage), 0);
+					flag_1 = 1;
+					start_1 = time(NULL);
+				}
+				else{
+					printf("Data 1 received.\n");
+					send(sockfd_1, receiveMessage, sizeof(receiveMessage), 0);
+					flag_1 = 0;
+					check_1 = 1;
+					if(check_2 == 1) break;
+				}
+				memset(ciph, 0, sizeof(ciph));
 			}
 		}
-		
-		/* check message correction */
-		
-		printf("Set key in TA\n");
-		set_key(&ctx);
-		
-		printf("Reset ciphering operation in TA (provides the initial vector)\n");
-		set_iv(&ctx, iv, AES_BLOCK_SIZE);
-		
-		printf("Decode buffer from TA\n");
-		cipher_buffer(&ctx, ciph, AES_TEST_BUFFER_SIZE, &result);
-		if(result == 0){
-			send(forClientSockfd, failMessage, sizeof(failMessage), 0);
+
+		if(check_2 == 0){
+status_2:
+			ret_2 = recv(sockfd_2, ciph, sizeof(ciph), MSG_DONTWAIT);
+			if(ret_2 < 0){
+				end_2 = time(NULL);
+				wait_2 = difftime(end_2, start_2);
+				if(wait_2 > 10){
+					printf("Client 2 lost.\n");
+					flag_2 = 2;
+					if(check_1 == -1) break;
+					else if(flag_1 == 2 || flag_1 == 0) break;
+					else goto status_1;
+				}
+			}
+			else{
+				printf("From Client 2: %s\n", ciph);
+
+				/* check message 2 correction */
+
+				printf("Set key in TA\n");
+				set_key(&ctx);
+
+				printf("Reset ciphering operation in TA (provides the initial vector)\n");
+				set_iv(&ctx, iv, AES_BLOCK_SIZE);
+
+				printf("Decode buffer from TA\n");
+				cipher_buffer(&ctx, ciph, AES_TEST_BUFFER_SIZE, &result);
+				if(result == 0){
+					printf("Incorrect Data. Request Client 2 to send again...\n");
+					send(sockfd_2, failMessage, sizeof(failMessage), 0);
+					flag_2 = 1;
+					start_2 = time(NULL);
+				}
+				else{
+					printf("Data 2 received.\n");
+					send(sockfd_2, receiveMessage, sizeof(receiveMessage), 0);
+					flag_2 = 0;
+					check_2 = 1;
+					if(check_1 == 1) break;
+				}
+				memset(ciph, 0, sizeof(ciph));
+			}
 		}
-		else{
-			send(forClientSockfd, receiveMessage, sizeof(receiveMessage), 0);
-			cnt++;
-		}
-		memset(ciph, 0, sizeof(ciph));
 	}
 	
-	close(sockfd);
+	close(sockfd_1);
+	close(sockfd_2);
 	
 	/* Encrypt Status */
 	
@@ -634,7 +665,7 @@ send_2:
 	printf("Client: Send Status\n");
 	
 	printf("Creating socket...\n");
-	sockfd = 0;
+	int sockfd = 0;
 	sockfd = socket(AF_INET, SOCK_STREAM , 0);
 
 	if (sockfd == -1){
