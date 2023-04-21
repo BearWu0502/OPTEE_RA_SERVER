@@ -548,7 +548,7 @@ send_2:
 	if(flag_2 != 0) check--;
 	char receiveMessage[] = {"Data received.\n"};
 	char failMessage[] = {"Incorrect Data.\n"};
-	
+	/*
 	printf("Creating socket...\n");
 	int sockfd = 0, forClientSockfd = 0;
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -565,12 +565,31 @@ send_2:
 	serverInfo.sin_port = htons(8700);
 	bind(sockfd, (struct sockaddr*)&serverInfo, sizeof(serverInfo));
 	listen(sockfd, 5);
-	
+	*/
 	while(cnt < check){
 		printf("Client Linking...\n");
-		forClientSockfd = accept(sockfd, (struct sockaddr*)&clientInfo, &addrlen);
-		recv(forClientSockfd, ciph, sizeof(ciph), 0);
-		printf("From Client: %s\n", ciph);
+		//forClientSockfd = accept(sockfd, (struct sockaddr*)&clientInfo, &addrlen);
+		if(flag_1 == 0){
+			recv(sockfd_1, ciph, sizeof(ciph), 0);
+			printf("From Client 1: %s\n", ciph);
+			
+			/* check message 1 correction */
+		
+			printf("Set key in TA\n");
+			set_key(&ctx);
+		
+			printf("Reset ciphering operation in TA (provides the initial vector)\n");
+			set_iv(&ctx, iv, AES_BLOCK_SIZE);
+			
+			printf("Decode buffer from TA\n");
+			cipher_buffer(&ctx, ciph, AES_TEST_BUFFER_SIZE, &result);
+			if(result == 0){
+				send(sockfd_1, failMessage, sizeof(failMessage), 0);
+			}
+			else{
+				send(sockfd_1, receiveMessage, sizeof(receiveMessage), 0);
+			}
+		}
 		
 		/* check message correction */
 		
