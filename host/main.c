@@ -483,6 +483,7 @@ recv_2:
 	ret_1 = 0, ret_2 = 0;
 	
 	if(flag_1 == 0){
+		flag_1 = -1;
 		printf("Server: Send AES Key to Client 1\n");
 send_1:
 		printf("Sending Encrypted AES Key to Client 1...\n");
@@ -521,6 +522,7 @@ send_1:
 	}
 	
 	if(flag_2 == 0){
+		flag_2 = -1;
 		printf("Server: Send AES Key to Client 2\n");
 send_2:
 		printf("Sending Encrypted AES Key to Client 2...\n");
