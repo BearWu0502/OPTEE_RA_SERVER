@@ -472,7 +472,7 @@ static TEE_Result cipher_buffer(void *session, uint32_t param_types,
 				params[0].memref.buffer, params[0].memref.size, temp, &temp_size);
 		if(temp[0] == 'N'){
 			params[0].memref.size = 1;
-			int i = AES_BUFFER_SIZE, pos;
+			int i = AES_BUFFER_SIZE-1, pos;
 			while(1){
 				if(msg[i] == '\n'){
 					pos = i+1;
